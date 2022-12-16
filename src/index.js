@@ -144,7 +144,7 @@ export default class ImageTool {
         name: 'right',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" id="Layer" enable-background="new 0 0 64 64" height="20" viewBox="0 0 64 64" width="20"><path d="m54 8h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 52h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 19h-28c-1.104 0-2 .896-2 2s.896 2 2 2h28c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 30h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 41h-28c-1.104 0-2 .896-2 2s.896 2 2 2h28c1.104 0 2-.896 2-2s-.896-2-2-2z"/></svg>`,
         title: 'With right',
-        toggle: false,
+        toggle: true,
       },
     ];
   }
@@ -467,9 +467,16 @@ export default class ImageTool {
    * @returns {void}
    */
   setTune(tuneName, value) {
-    this._data[tuneName] = value;
+    if (tuneName !== 'left' && tuneName !== 'center' && tuneName !== 'right') {
+      this._data[tuneName] = value;
+    }
 
     this.ui.applyTune(tuneName, value);
+
+    //TODO: alignment 추가
+    if (tuneName === 'left' || tuneName === 'center' || tuneName === 'right') {
+      this._data.alignment = value ? tuneName : '';
+    }
 
     if (tuneName === 'stretched') {
       /**
