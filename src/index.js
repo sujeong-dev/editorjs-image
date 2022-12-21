@@ -172,9 +172,18 @@ export default class ImageTool {
       captionPlaceholder: this.api.i18n.t(
         config.captionPlaceholder || 'Caption'
       ),
+      widthPlaceholder: this.api.i18n.t(
+        config.captionPlaceholder || 'width (px, % 등 단위포함)'
+      ),
+      heightPlaceholder: this.api.i18n.t(
+        config.captionPlaceholder || 'height (px, % 등 단위포함)'
+      ),
       buttonContent: config.buttonContent || '',
       uploader: config.uploader || undefined,
       actions: config.actions || [],
+      left: false,
+      center: false,
+      right: false,
     };
 
     /**
@@ -263,7 +272,9 @@ export default class ImageTool {
       label: this.api.i18n.t(tune.title),
       name: tune.name,
       toggle: tune.toggle,
-      isActive: this.data[tune.name],
+      isActive: ['left', 'center', 'right'].includes(tune.name)
+        ? this.config[tune.name]
+        : this.data[tune.name],
       onActivate: () => {
         /* If it'a user defined tune, execute it's callback stored in action property */
         if (typeof tune.action === 'function') {
@@ -456,7 +467,20 @@ export default class ImageTool {
    */
   tuneToggled(tuneName) {
     // inverse tune state
-    this.setTune(tuneName, !this._data[tuneName]);
+    // console.log('tuneName: ' + tuneName);
+    // console.log('alignment: ' + this._data.alignment);
+    // this.setTune(tuneName, this._data.alignment === tuneName);
+    // this.setTune(tuneName, !this.config[tuneName]);
+    if (['left', 'center', 'right'].includes(tuneName)) {
+      // if (this.config[tuneName]) {
+      //   console.log(tuneName);
+      //   console.log(this.config[tuneName]);
+      //   return;
+      // }
+      this.setTune(tuneName, !this.config[tuneName]);
+    } else {
+      this.setTune(tuneName, !this._data[tuneName]);
+    }
   }
 
   /**
@@ -467,15 +491,16 @@ export default class ImageTool {
    * @returns {void}
    */
   setTune(tuneName, value) {
-    if (tuneName !== 'left' && tuneName !== 'center' && tuneName !== 'right') {
-      this._data[tuneName] = value;
-    }
-
-    this.ui.applyTune(tuneName, value);
-
-    //TODO: alignment 추가
+    //TODO: alignment 추가 -> css class를 toggle하기 위해서 alignment의 boolean값이 꼭 필요하다
     if (tuneName === 'left' || tuneName === 'center' || tuneName === 'right') {
+      ['left', 'center', 'right'].forEach((tuneNm) => {
+        this.ui.applyTune(tuneNm, tuneNm === tuneName);
+        this.config[tuneNm] = tuneNm === tuneName;
+      });
       this._data.alignment = value ? tuneName : '';
+    } else {
+      this.ui.applyTune(tuneName, value);
+      this._data[tuneName] = value;
     }
 
     if (tuneName === 'stretched') {

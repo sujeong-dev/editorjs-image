@@ -15,6 +15,7 @@ export default class Ui {
    * @param {Function} ui.onSelectFile - callback for clicks on Select file button
    * @param {boolean} ui.readOnly - read-only mode flag
    */
+  //TODO: imageWidth, imageHeinht div 및 placeholder추가
   constructor({ api, config, onSelectFile, readOnly }) {
     this.api = api;
     this.config = config;
@@ -22,7 +23,22 @@ export default class Ui {
     this.readOnly = readOnly;
     this.nodes = {
       wrapper: make('div', [this.CSS.baseClass, this.CSS.wrapper]),
-      imageContainer: make('div', [ this.CSS.imageContainer ]),
+      imageContainer: make('div', [this.CSS.imageContainer]),
+      imageWidth: make(
+        'div',
+        [this.CSS.input, this.CSS.caption, this.CSS.setImage],
+        {
+          contentEditable: !this.readOnly,
+        }
+      ),
+      imageHeight: make(
+        'div',
+        [this.CSS.input, this.CSS.caption, this.CSS.setImage],
+        {
+          contentEditable: !this.readOnly,
+        }
+      ),
+      setSizeButton: this.createSetSizeButton(),
       fileButton: this.createFileButton(),
       imageEl: undefined,
       imagePreloader: make('div', this.CSS.imagePreloader),
@@ -42,8 +58,13 @@ export default class Ui {
      *  </wrapper>
      */
     this.nodes.caption.dataset.placeholder = this.config.captionPlaceholder;
+    this.nodes.imageWidth.dataset.placeholder = this.config.widthPlaceholder;
+    this.nodes.imageHeight.dataset.placeholder = this.config.heightPlaceholder;
     this.nodes.imageContainer.appendChild(this.nodes.imagePreloader);
     this.nodes.wrapper.appendChild(this.nodes.imageContainer);
+    this.nodes.wrapper.appendChild(this.nodes.imageWidth);
+    this.nodes.wrapper.appendChild(this.nodes.imageHeight);
+    this.nodes.wrapper.appendChild(this.nodes.setSizeButton);
     this.nodes.wrapper.appendChild(this.nodes.caption);
     this.nodes.wrapper.appendChild(this.nodes.fileButton);
   }
@@ -68,8 +89,10 @@ export default class Ui {
       imagePreloader: 'image-tool__image-preloader',
       imageEl: 'image-tool__image-picture',
       caption: 'image-tool__caption',
+      setImage: 'image-tool__setImage',
+      setSizeBtn: 'image-tool__setSizeBtn',
     };
-  };
+  }
 
   /**
    * Ui statuses:
@@ -109,9 +132,11 @@ export default class Ui {
    * @returns {Element}
    */
   createFileButton() {
-    const button = make('div', [ this.CSS.button ]);
+    const button = make('div', [this.CSS.button]);
 
-    button.innerHTML = this.config.buttonContent || `${IconPicture} ${this.api.i18n.t('Select an Image')}`;
+    button.innerHTML =
+      this.config.buttonContent ||
+      `${IconPicture} ${this.api.i18n.t('Select an Image')}`;
 
     button.addEventListener('click', () => {
       this.onSelectFile();
@@ -214,6 +239,33 @@ export default class Ui {
   }
 
   /**
+   * Create size set button
+   *
+   * @returns {Element}
+   */
+  createSetSizeButton() {
+    const button = make('div', [this.CSS.setSizeBtn]);
+
+    button.innerHTML = `${this.api.i18n.t('Set Image Size')}`;
+
+    button.addEventListener('click', () => {
+      this.setSize();
+    });
+
+    return button;
+  }
+
+  /**
+   * Set image size
+   *
+   * @returns {void}
+   */
+  setSize() {
+    this.nodes.imageEl.style.width = this.nodes.imageWidth.textContent;
+    this.nodes.imageEl.style.height = this.nodes.imageHeight.textContent;
+  }
+
+  /**
    * Shows caption input
    *
    * @param {string} text - caption text
@@ -234,7 +286,10 @@ export default class Ui {
   toggleStatus(status) {
     for (const statusType in Ui.status) {
       if (Object.prototype.hasOwnProperty.call(Ui.status, statusType)) {
-        this.nodes.wrapper.classList.toggle(`${this.CSS.wrapper}--${Ui.status[statusType]}`, status === Ui.status[statusType]);
+        this.nodes.wrapper.classList.toggle(
+          `${this.CSS.wrapper}--${Ui.status[statusType]}`,
+          status === Ui.status[statusType]
+        );
       }
     }
   }
@@ -247,7 +302,9 @@ export default class Ui {
    * @returns {void}
    */
   applyTune(tuneName, status) {
-    this.nodes.wrapper.classList.toggle(`${this.CSS.wrapper}--${tuneName}`, status);
+    this.nodes.wrapper.classList.toggle(
+      `${this.CSS.wrapper}--${tuneName}`,
+      status
+    );
   }
 }
-

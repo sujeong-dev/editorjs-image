@@ -63,6 +63,27 @@
     }
   }
 
+  &__setImage {
+    display: inline-block;
+    width: 30%;
+    margin-right: 10px;
+  }
+
+  &__setSizeBtn {
+    display: inline-block;
+    width: 20%;
+    padding: 10px 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(201, 201, 204, 0.48);
+    font-size: 14.9px;
+    background: #fff;
+    -webkit-box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    color: #707684;
+    text-align: center;
+    cursor: pointer;
+  }
+
   &--empty {
     ^&__image {
       display: none;
