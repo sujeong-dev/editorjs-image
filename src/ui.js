@@ -249,7 +249,8 @@ export default class Ui {
     button.innerHTML = `${this.api.i18n.t('Set Image Size')}`;
 
     button.addEventListener('click', () => {
-      this.setSize();
+      this.nodes.imageEl.style.width = this.setSize()[0];
+      this.nodes.imageEl.style.height = this.setSize()[1];
     });
 
     return button;
@@ -258,11 +259,13 @@ export default class Ui {
   /**
    * Set image size
    *
-   * @returns {void}
+   * @returns {Array}
    */
   setSize() {
-    this.nodes.imageEl.style.width = this.nodes.imageWidth.textContent;
-    this.nodes.imageEl.style.height = this.nodes.imageHeight.textContent;
+    return [
+      this.nodes.imageWidth.textContent,
+      this.nodes.imageHeight.textContent,
+    ];
   }
 
   /**

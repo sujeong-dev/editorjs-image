@@ -133,18 +133,21 @@ export default class ImageTool {
         icon: `<svg xmlns="http://www.w3.org/2000/svg" id="Layer" enable-background="new 0 0 64 64" height="20" viewBox="0 0 64 64" width="20"><path d="m54 8h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 52h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m10 23h28c1.104 0 2-.896 2-2s-.896-2-2-2h-28c-1.104 0-2 .896-2 2s.896 2 2 2z"/><path d="m54 30h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m10 45h28c1.104 0 2-.896 2-2s-.896-2-2-2h-28c-1.104 0-2 .896-2 2s.896 2 2 2z"/></svg>`,
         title: 'With left',
         toggle: true,
+        toggleValue: false,
       },
       {
         name: 'center',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" id="Layer" enable-background="new 0 0 64 64" height="20" viewBox="0 0 64 64" width="20"><path d="m54 8h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 52h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m46 23c1.104 0 2-.896 2-2s-.896-2-2-2h-28c-1.104 0-2 .896-2 2s.896 2 2 2z"/><path d="m54 30h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m46 45c1.104 0 2-.896 2-2s-.896-2-2-2h-28c-1.104 0-2 .896-2 2s.896 2 2 2z"/></svg>`,
         title: 'With center',
         toggle: true,
+        toggleValue: false,
       },
       {
         name: 'right',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" id="Layer" enable-background="new 0 0 64 64" height="20" viewBox="0 0 64 64" width="20"><path d="m54 8h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 52h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 19h-28c-1.104 0-2 .896-2 2s.896 2 2 2h28c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 30h-44c-1.104 0-2 .896-2 2s.896 2 2 2h44c1.104 0 2-.896 2-2s-.896-2-2-2z"/><path d="m54 41h-28c-1.104 0-2 .896-2 2s.896 2 2 2h28c1.104 0 2-.896 2-2s-.896-2-2-2z"/></svg>`,
         title: 'With right',
         toggle: true,
+        toggleValue: false,
       },
     ];
   }
@@ -181,9 +184,6 @@ export default class ImageTool {
       buttonContent: config.buttonContent || '',
       uploader: config.uploader || undefined,
       actions: config.actions || [],
-      left: false,
-      center: false,
-      right: false,
     };
 
     /**
@@ -251,6 +251,8 @@ export default class ImageTool {
     const caption = this.ui.nodes.caption;
 
     this._data.caption = caption.innerHTML;
+    this._data.width = this.ui.setSize()[0];
+    this._data.height = this.ui.setSize()[1];
 
     return this.data;
   }
@@ -273,7 +275,7 @@ export default class ImageTool {
       name: tune.name,
       toggle: tune.toggle,
       isActive: ['left', 'center', 'right'].includes(tune.name)
-        ? this.config[tune.name]
+        ? tune.toggleValue
         : this.data[tune.name],
       onActivate: () => {
         /* If it'a user defined tune, execute it's callback stored in action property */
@@ -388,13 +390,24 @@ export default class ImageTool {
     this._data.caption = data.caption || '';
     this.ui.fillCaption(this._data.caption);
 
-    ImageTool.tunes.forEach(({ name: tune }) => {
-      const value =
-        typeof data[tune] !== 'undefined'
-          ? data[tune] === true || data[tune] === 'true'
-          : false;
+    const alignArr = ['left', 'center', 'right'];
 
-      this.setTune(tune, value);
+    ImageTool.tunes.forEach(({ name: tune, toggleValue }) => {
+      if (alignArr.includes(tune)) {
+        const value =
+          typeof toggleValue !== 'undefined'
+            ? toggleValue === true || toggleValue === 'true'
+            : false;
+
+        this.setTune(tune, value);
+      } else {
+        const value =
+          typeof data[tune] !== 'undefined'
+            ? data[tune] === true || data[tune] === 'true'
+            : false;
+
+        this.setTune(tune, value);
+      }
     });
   }
 
@@ -467,17 +480,12 @@ export default class ImageTool {
    */
   tuneToggled(tuneName) {
     // inverse tune state
-    // console.log('tuneName: ' + tuneName);
-    // console.log('alignment: ' + this._data.alignment);
-    // this.setTune(tuneName, this._data.alignment === tuneName);
-    // this.setTune(tuneName, !this.config[tuneName]);
-    if (['left', 'center', 'right'].includes(tuneName)) {
-      // if (this.config[tuneName]) {
-      //   console.log(tuneName);
-      //   console.log(this.config[tuneName]);
-      //   return;
-      // }
-      this.setTune(tuneName, !this.config[tuneName]);
+    const alignArr = ['left', 'center', 'right'];
+
+    if (alignArr.includes(tuneName)) {
+      ImageTool.tunes.forEach(({ name: tune, toggleValue }) => {
+        alignArr.includes(tune) && this.setTune(tune, !toggleValue);
+      });
     } else {
       this.setTune(tuneName, !this._data[tuneName]);
     }
@@ -491,17 +499,26 @@ export default class ImageTool {
    * @returns {void}
    */
   setTune(tuneName, value) {
-    //TODO: alignment 추가 -> css class를 toggle하기 위해서 alignment의 boolean값이 꼭 필요하다
-    if (tuneName === 'left' || tuneName === 'center' || tuneName === 'right') {
-      ['left', 'center', 'right'].forEach((tuneNm) => {
-        this.ui.applyTune(tuneNm, tuneNm === tuneName);
-        this.config[tuneNm] = tuneNm === tuneName;
-      });
+    // TODO: alignment 추가 -> css class를 toggle하기 위해서 alignment의 boolean값이 꼭 필요하다
+    const alignArr = ['left', 'center', 'right'];
+
+    if (alignArr.includes(tuneName)) {
+      this.ui.applyTune(tuneName, value);
       this._data.alignment = value ? tuneName : '';
     } else {
       this.ui.applyTune(tuneName, value);
       this._data[tuneName] = value;
     }
+    // if (tuneName === 'left' || tuneName === 'center' || tuneName === 'right') {
+    //   ['left', 'center', 'right'].forEach((tuneNm) => {
+    //     this.ui.applyTune(tuneNm, tuneNm === tuneName);
+    //     this.config[tuneNm] = tuneNm === tuneName;
+    //   });
+    //   this._data.alignment = value ? tuneName : '';
+    // } else {
+    //   this.ui.applyTune(tuneName, value);
+    //   this._data[tuneName] = value;
+    // }
 
     if (tuneName === 'stretched') {
       /**
