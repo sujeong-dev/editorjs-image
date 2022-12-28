@@ -63,6 +63,38 @@
     }
   }
 
+  /* &__leftAlign {
+    display: inline-block;
+    width: 20%;
+    margin-right: 10px;
+  }
+
+  &__centerAlign {
+    display: inline-block;
+    width: 20%;
+    margin-right: 10px;
+  }
+
+  &__rightAlign {
+    display: inline-block;
+    width: 20%;
+    margin-right: 10px;
+  } */
+
+  &__alignButton {
+    border: none;
+    background-color: transparent;
+
+    &:hover {
+      border: 1px solid rgba(201, 201, 204, 0.48);
+    }
+  }
+
+  &__align-selected {
+    background: rgba(56, 138, 229, 0.1);
+    color: #388ae5;
+  }
+
   &__setImage {
     display: inline-block;
     width: 30%;

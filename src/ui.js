@@ -1,4 +1,9 @@
-import { IconPicture } from '@codexteam/icons';
+import {
+  IconPicture,
+  IconAlignLeft,
+  IconAlignRight,
+  IconAlignCenter,
+} from '@codexteam/icons';
 import { make } from './utils/dom';
 
 /**
@@ -15,7 +20,6 @@ export default class Ui {
    * @param {Function} ui.onSelectFile - callback for clicks on Select file button
    * @param {boolean} ui.readOnly - read-only mode flag
    */
-  //TODO: imageWidth, imageHeinht div 및 placeholder추가
   constructor({ api, config, onSelectFile, readOnly }) {
     this.api = api;
     this.config = config;
@@ -38,6 +42,9 @@ export default class Ui {
           contentEditable: !this.readOnly,
         }
       ),
+      leftAlign: this.createLeftAlignButton(),
+      centerAlign: this.createCenterAlignButton(),
+      rightAlign: this.createRightAlignButton(),
       setSizeButton: this.createSetSizeButton(),
       fileButton: this.createFileButton(),
       imageEl: undefined,
@@ -60,8 +67,11 @@ export default class Ui {
     this.nodes.caption.dataset.placeholder = this.config.captionPlaceholder;
     this.nodes.imageWidth.dataset.placeholder = this.config.widthPlaceholder;
     this.nodes.imageHeight.dataset.placeholder = this.config.heightPlaceholder;
-    this.nodes.imageContainer.appendChild(this.nodes.imagePreloader);
+    this.nodes.wrapper.appendChild(this.nodes.imagePreloader);
     this.nodes.wrapper.appendChild(this.nodes.imageContainer);
+    this.nodes.wrapper.appendChild(this.nodes.leftAlign);
+    this.nodes.wrapper.appendChild(this.nodes.centerAlign);
+    this.nodes.wrapper.appendChild(this.nodes.rightAlign);
     this.nodes.wrapper.appendChild(this.nodes.imageWidth);
     this.nodes.wrapper.appendChild(this.nodes.imageHeight);
     this.nodes.wrapper.appendChild(this.nodes.setSizeButton);
@@ -90,6 +100,10 @@ export default class Ui {
       imageEl: 'image-tool__image-picture',
       caption: 'image-tool__caption',
       setImage: 'image-tool__setImage',
+      leftAlign: 'image-tool__leftAlign',
+      centerAlign: 'image-tool__centerAlign',
+      rightAlign: 'image-tool__rightAlign',
+      alignButton: 'image-tool__alignButton',
       setSizeBtn: 'image-tool__setSizeBtn',
     };
   }
@@ -239,33 +253,127 @@ export default class Ui {
   }
 
   /**
-   * Create size set button
+   * Create align left set button
    *
    * @returns {Element}
    */
-  createSetSizeButton() {
-    const button = make('div', [this.CSS.setSizeBtn]);
+  createLeftAlignButton() {
+    const button = make('button', [this.CSS.leftAlign, this.CSS.alignButton]);
 
-    button.innerHTML = `${this.api.i18n.t('Set Image Size')}`;
-
+    button.innerHTML = `${IconAlignLeft}`;
     button.addEventListener('click', () => {
-      this.nodes.imageEl.style.width = this.setSize()[0];
-      this.nodes.imageEl.style.height = this.setSize()[1];
+      this.onSelectAlign('left');
     });
 
     return button;
   }
 
   /**
-   * Set image size
+   * Create align center set button
    *
-   * @returns {Array}
+   * @returns {Element}
    */
-  setSize() {
-    return [
-      this.nodes.imageWidth.textContent,
-      this.nodes.imageHeight.textContent,
-    ];
+  createCenterAlignButton() {
+    const button = make('button', [this.CSS.centerAlign, this.CSS.alignButton]);
+
+    button.innerHTML = `${IconAlignCenter}`;
+    button.addEventListener('click', () => {
+      this.onSelectAlign('center');
+    });
+
+    return button;
+  }
+
+  /**
+   * Create align right set button
+   *
+   * @returns {Element}
+   */
+  createRightAlignButton() {
+    const button = make('button', [this.CSS.rightAlign, this.CSS.alignButton]);
+
+    button.innerHTML = `${IconAlignRight}`;
+    button.addEventListener('click', () => {
+      this.onSelectAlign('right');
+    });
+
+    return button;
+  }
+
+  /**
+   *
+   * @returns {boolean}
+   */
+  alignToggle(align) {
+    return !align;
+  }
+
+  /**
+   * Show preloader and upload image by target url
+   *
+   *
+   * @returns {void}
+   */
+  onSelectAlign(align) {
+    this.config.isSelectedLeft =
+      align === 'left' ? this.alignToggle(this.config.isSelectedLeft) : false;
+    this.config.isSelectedCenter =
+      align === 'center'
+        ? this.alignToggle(this.config.isSelectedCenter)
+        : false;
+    this.config.isSelectedRight =
+      align === 'right' ? this.alignToggle(this.config.isSelectedRight) : false;
+    this.applyTune('left', this.config.isSelectedLeft);
+    this.applyTune('center', this.config.isSelectedCenter);
+    this.applyTune('right', this.config.isSelectedRight);
+    this.applyAlign();
+  }
+
+  /**
+   * get width value entered or cotrolled by user
+   *
+   * @returns {String}
+   */
+  get imageWidth() {
+    return this.nodes.imageWidth.textContent;
+  }
+
+  /**
+   * get height value entered or cotrolled by user
+   *
+   * @returns {String}
+   */
+  get imageHeight() {
+    return this.nodes.imageHeight.textContent;
+  }
+
+  /**
+   * Set image width and height value
+   *
+   * @returns {Void}
+   */
+  onSetImageSize() {
+    this.config.imageWidth = this.imageWidth;
+    this.config.imageHeight = this.imageHeight;
+    this.nodes.imageEl.style.width = this.imageWidth;
+    this.nodes.imageEl.style.height = this.imageHeight;
+  }
+
+  /**
+   * Create size set button
+   *
+   * @returns {Element}
+   */
+  createSetSizeButton() {
+    const button = make('button', [this.CSS.setSizeBtn]);
+
+    button.innerHTML = `${this.api.i18n.t('Set Image Size')}`;
+
+    button.addEventListener('click', () => {
+      this.onSetImageSize();
+    });
+
+    return button;
   }
 
   /**
@@ -300,7 +408,7 @@ export default class Ui {
   /**
    * Apply visual representation of activated tune
    *
-   * @param {string} tuneName - one of available tunes {@link Tunes.tunes}
+   *  - one of available tunes {@link Tunes.tunes}
    * @param {boolean} status - true for enable, false for disable
    * @returns {void}
    */
@@ -308,6 +416,28 @@ export default class Ui {
     this.nodes.wrapper.classList.toggle(
       `${this.CSS.wrapper}--${tuneName}`,
       status
+    );
+  }
+
+  /**
+   * Apply visual representation of activated tune
+   *
+   *  - one of available tunes {@link Tunes.tunes}
+   *
+   * @returns {void}
+   */
+  applyAlign() {
+    this.nodes.leftAlign.classList.toggle(
+      'image-tool__align-selected',
+      this.config.isSelectedLeft
+    );
+    this.nodes.centerAlign.classList.toggle(
+      'image-tool__align-selected',
+      this.config.isSelectedCenter
+    );
+    this.nodes.rightAlign.classList.toggle(
+      'image-tool__align-selected',
+      this.config.isSelectedRight
     );
   }
 }
