@@ -155,10 +155,10 @@ export default class ImageTool {
         config.captionPlaceholder || 'Caption'
       ),
       widthPlaceholder: this.api.i18n.t(
-        config.captionPlaceholder || 'width (px, % 등 단위포함)'
+        config.captionPlaceholder || 'width (px)'
       ),
       heightPlaceholder: this.api.i18n.t(
-        config.captionPlaceholder || 'height (px, % 등 단위포함)'
+        config.captionPlaceholder || 'height (px)'
       ),
       buttonContent: config.buttonContent || '',
       uploader: config.uploader || undefined,
@@ -166,8 +166,8 @@ export default class ImageTool {
       isSelectedLeft: config.isSelectedLeft || false,
       isSelectedCenter: config.isSelectedCenter || false,
       isSelectedRight: config.isSelectedRight || false,
-      imageWidth: config.imageWidth || '',
-      imageHeight: config.imageHeight || '',
+      imageWidth: config.imageWidth || 0,
+      imageHeight: config.imageHeight || 0,
     };
 
     /**

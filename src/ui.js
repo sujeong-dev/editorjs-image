@@ -42,6 +42,7 @@ export default class Ui {
           contentEditable: !this.readOnly,
         }
       ),
+      alignContainer: make('div', this.CSS.alignContainer),
       leftAlign: this.createLeftAlignButton(),
       centerAlign: this.createCenterAlignButton(),
       rightAlign: this.createRightAlignButton(),
@@ -66,15 +67,27 @@ export default class Ui {
      */
     this.nodes.caption.dataset.placeholder = this.config.captionPlaceholder;
     this.nodes.imageWidth.dataset.placeholder = this.config.widthPlaceholder;
+    this.nodes.imageWidth.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        this.onSetImageSize();
+      }
+    });
     this.nodes.imageHeight.dataset.placeholder = this.config.heightPlaceholder;
+    this.nodes.imageHeight.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        this.onSetImageSize();
+      }
+    });
+
     this.nodes.wrapper.appendChild(this.nodes.imagePreloader);
     this.nodes.wrapper.appendChild(this.nodes.imageContainer);
-    this.nodes.wrapper.appendChild(this.nodes.leftAlign);
-    this.nodes.wrapper.appendChild(this.nodes.centerAlign);
-    this.nodes.wrapper.appendChild(this.nodes.rightAlign);
-    this.nodes.wrapper.appendChild(this.nodes.imageWidth);
-    this.nodes.wrapper.appendChild(this.nodes.imageHeight);
-    this.nodes.wrapper.appendChild(this.nodes.setSizeButton);
+    this.nodes.wrapper.appendChild(this.nodes.alignContainer);
+    this.nodes.alignContainer.appendChild(this.nodes.leftAlign);
+    this.nodes.alignContainer.appendChild(this.nodes.centerAlign);
+    this.nodes.alignContainer.appendChild(this.nodes.rightAlign);
+    this.nodes.alignContainer.appendChild(this.nodes.imageWidth);
+    this.nodes.alignContainer.appendChild(this.nodes.imageHeight);
+    this.nodes.alignContainer.appendChild(this.nodes.setSizeButton);
     this.nodes.wrapper.appendChild(this.nodes.caption);
     this.nodes.wrapper.appendChild(this.nodes.fileButton);
   }
@@ -100,6 +113,7 @@ export default class Ui {
       imageEl: 'image-tool__image-picture',
       caption: 'image-tool__caption',
       setImage: 'image-tool__setImage',
+      alignContainer: 'image-tool__alignContainer',
       leftAlign: 'image-tool__leftAlign',
       centerAlign: 'image-tool__centerAlign',
       rightAlign: 'image-tool__rightAlign',
@@ -329,12 +343,52 @@ export default class Ui {
     this.applyAlign();
   }
 
+  createInputWidth() {
+    const div = make(
+      'div',
+      [this.CSS.input, this.CSS.caption, this.CSS.setImage],
+      {
+        contentEditable: !this.readOnly,
+      }
+    );
+
+    this.nodes.imageWidth.dataset.placeholder = this.config.widthPlaceholder;
+
+    div.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        this.onSetImageSize();
+      }
+    });
+
+    return div;
+  }
+
+  createInputHeight() {
+    const div = make(
+      'div',
+      [this.CSS.input, this.CSS.caption, this.CSS.setImage],
+      {
+        contentEditable: !this.readOnly,
+      }
+    );
+
+    this.nodes.imageHeight.dataset.placeholder = this.config.heightPlaceholder;
+
+    div.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        this.onSetImageSize();
+      }
+    });
+
+    return div;
+  }
+
   /**
    * get width value entered or cotrolled by user
    *
    * @returns {String}
    */
-  get imageWidth() {
+  get getImageWidth() {
     return this.nodes.imageWidth.textContent;
   }
 
@@ -343,7 +397,7 @@ export default class Ui {
    *
    * @returns {String}
    */
-  get imageHeight() {
+  get getImageHeight() {
     return this.nodes.imageHeight.textContent;
   }
 
@@ -353,10 +407,14 @@ export default class Ui {
    * @returns {Void}
    */
   onSetImageSize() {
-    this.config.imageWidth = this.imageWidth;
-    this.config.imageHeight = this.imageHeight;
-    this.nodes.imageEl.style.width = this.imageWidth;
-    this.nodes.imageEl.style.height = this.imageHeight;
+    this.config.imageWidth =
+      this.getImageWidth === '' ? 0 : Number(this.getImageWidth);
+    this.config.imageHeight =
+      this.getImageHeight === '' ? 0 : Number(this.getImageHeight);
+    this.nodes.imageEl.style.width =
+      this.getImageWidth === '' ? '' : this.getImageWidth + 'px';
+    this.nodes.imageEl.style.height =
+      this.getImageHeight === '' ? '' : this.getImageHeight + 'px';
   }
 
   /**

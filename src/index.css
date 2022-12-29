@@ -6,7 +6,7 @@
   &__image {
     border-radius: 3px;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 
     &-picture {
       max-width: 100%;
@@ -81,6 +81,13 @@
     margin-right: 10px;
   } */
 
+  &__alignContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
   &__alignButton {
     border: none;
     background-color: transparent;
@@ -97,7 +104,7 @@
 
   &__setImage {
     display: inline-block;
-    width: 30%;
+    width: 100px;
     margin-right: 10px;
   }
 
