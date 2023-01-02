@@ -6,10 +6,11 @@
   &__image {
     border-radius: 3px;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 
     &-picture {
-      max-width: 100%;
+      max-width: 700px;
+      max-height: 520px;
       vertical-align: bottom;
       display: block;
     }
@@ -25,7 +26,7 @@
       background-position: center center;
 
       &::after {
-        content: "";
+        content: '';
         position: absolute;
         z-index: 3;
         width: 60px;
@@ -44,7 +45,7 @@
   }
 
   &__caption {
-    &[contentEditable="true"][data-placeholder]::before {
+    &[contentEditable='true'][data-placeholder]::before {
       position: absolute !important;
       content: attr(data-placeholder);
       color: #707684;
@@ -52,7 +53,7 @@
       display: none;
     }
 
-    &[contentEditable="true"][data-placeholder]:empty {
+    &[contentEditable='true'][data-placeholder]:empty {
       &::before {
         display: block;
       }
@@ -61,6 +62,64 @@
         display: none;
       }
     }
+  }
+
+  /* &__leftAlign {
+    display: inline-block;
+    width: 20%;
+    margin-right: 10px;
+  }
+  &__centerAlign {
+    display: inline-block;
+    width: 20%;
+    margin-right: 10px;
+  }
+  &__rightAlign {
+    display: inline-block;
+    width: 20%;
+    margin-right: 10px;
+  } */
+
+  &__alignContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  &__alignButton {
+    border: none;
+    background-color: transparent;
+
+    &:hover {
+      border: 1px solid rgba(201, 201, 204, 0.48);
+    }
+  }
+
+  &__align-selected {
+    background: rgba(56, 138, 229, 0.1);
+    color: #388ae5;
+  }
+
+  &__setImage {
+    display: inline-block;
+    width: 100px;
+    margin-right: 10px;
+  }
+
+  &__setSizeBtn {
+    display: inline-block;
+    width: 20%;
+    padding: 10px 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(201, 201, 204, 0.48);
+    font-size: 14.9px;
+    background: #fff;
+    -webkit-box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    color: #707684;
+    text-align: center;
+    cursor: pointer;
   }
 
   &--empty {
@@ -133,6 +192,25 @@
       &-picture {
         width: 100%;
       }
+    }
+  }
+
+  /* TODO: align style 추가  */
+  &--left {
+    ^&__image-picture {
+      margin: 0;
+    }
+  }
+
+  &--center {
+    ^&__image-picture {
+      margin: 0 auto;
+    }
+  }
+
+  &--right {
+    ^&__image-picture {
+      margin: 0 0 0 auto;
     }
   }
 

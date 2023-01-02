@@ -46,7 +46,12 @@ import './index.css';
 import Ui from './ui';
 import Uploader from './uploader';
 
-import { IconAddBorder, IconStretch, IconAddBackground, IconPicture } from '@codexteam/icons';
+import {
+  IconAddBorder,
+  IconStretch,
+  IconAddBackground,
+  IconPicture,
+} from '@codexteam/icons';
 
 /**
  * @typedef {object} ImageConfig
@@ -146,10 +151,23 @@ export default class ImageTool {
       additionalRequestHeaders: config.additionalRequestHeaders || {},
       field: config.field || 'image',
       types: config.types || 'image/*',
-      captionPlaceholder: this.api.i18n.t(config.captionPlaceholder || 'Caption'),
+      captionPlaceholder: this.api.i18n.t(
+        config.captionPlaceholder || 'Caption'
+      ),
+      widthPlaceholder: this.api.i18n.t(
+        config.captionPlaceholder || 'width (px)'
+      ),
+      heightPlaceholder: this.api.i18n.t(
+        config.captionPlaceholder || 'height (px)'
+      ),
       buttonContent: config.buttonContent || '',
       uploader: config.uploader || undefined,
       actions: config.actions || [],
+      isSelectedLeft: config.isSelectedLeft || false,
+      isSelectedCenter: config.isSelectedCenter || false,
+      isSelectedRight: config.isSelectedRight || false,
+      imageWidth: config.imageWidth || 0,
+      imageHeight: config.imageHeight || 0,
     };
 
     /**
@@ -218,6 +236,19 @@ export default class ImageTool {
 
     this._data.caption = caption.innerHTML;
 
+    if (this.config.isSelectedLeft) {
+      this._data.alignment = 'left';
+    } else if (this.config.isSelectedCenter) {
+      this._data.alignment = 'center';
+    } else if (this.config.isSelectedRight) {
+      this._data.alignment = 'right';
+    } else {
+      this._data.alignment = '';
+    }
+
+    this._data.width = this.config.imageWidth;
+    this._data.height = this.config.imageHeight;
+
     return this.data;
   }
 
@@ -233,7 +264,7 @@ export default class ImageTool {
     // @see https://github.com/editor-js/image/pull/49
     const tunes = ImageTool.tunes.concat(this.config.actions);
 
-    return tunes.map(tune => ({
+    return tunes.map((tune) => ({
       icon: tune.icon,
       label: this.api.i18n.t(tune.title),
       name: tune.name,
@@ -288,7 +319,7 @@ export default class ImageTool {
        * Drag n drop file from into the Editor
        */
       files: {
-        mimeTypes: [ 'image/*' ],
+        mimeTypes: ['image/*'],
       },
     };
   }
@@ -353,7 +384,10 @@ export default class ImageTool {
     this.ui.fillCaption(this._data.caption);
 
     ImageTool.tunes.forEach(({ name: tune }) => {
-      const value = typeof data[tune] !== 'undefined' ? data[tune] === true || data[tune] === 'true' : false;
+      const value =
+        typeof data[tune] !== 'undefined'
+          ? data[tune] === true || data[tune] === 'true'
+          : false;
 
       this.setTune(tune, value);
     });
@@ -382,6 +416,8 @@ export default class ImageTool {
 
     if (file && file.url) {
       this.ui.fillImage(file.url);
+      console.log(this.ui.nodes.imageEl);
+      this.ui.makeImageResizable(this.ui.nodes.imageEl);
     }
   }
 
@@ -439,20 +475,20 @@ export default class ImageTool {
    * @returns {void}
    */
   setTune(tuneName, value) {
-    this._data[tuneName] = value;
-
     this.ui.applyTune(tuneName, value);
+    this._data[tuneName] = value;
 
     if (tuneName === 'stretched') {
       /**
        * Wait until the API is ready
        */
-      Promise.resolve().then(() => {
-        const blockId = this.api.blocks.getCurrentBlockIndex();
+      Promise.resolve()
+        .then(() => {
+          const blockId = this.api.blocks.getCurrentBlockIndex();
 
-        this.api.blocks.stretchBlock(blockId, value);
-      })
-        .catch(err => {
+          this.api.blocks.stretchBlock(blockId, value);
+        })
+        .catch((err) => {
           console.error(err);
         });
     }
