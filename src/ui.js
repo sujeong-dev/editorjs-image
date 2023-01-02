@@ -425,7 +425,7 @@ export default class Ui {
   createSetSizeButton() {
     const button = make('button', [this.CSS.setSizeBtn]);
 
-    button.innerHTML = `${this.api.i18n.t('Set Image Size')}`;
+    button.innerHTML = `${this.api.i18n.t('Resize Image')}`;
 
     button.addEventListener('click', () => {
       this.onSetImageSize();
