@@ -277,6 +277,8 @@ export default class Ui {
 
       var topLeft = group.findOne('.topLeft');
       var topRight = group.findOne('.topRight');
+      var middleRight = group.findOne('.middleRight');
+      var middleLeft = group.findOne('.middleLeft');
       var bottomRight = group.findOne('.bottomRight');
       var bottomLeft = group.findOne('.bottomLeft');
       var image = group.findOne('Image');
@@ -288,19 +290,31 @@ export default class Ui {
       switch (activeAnchor.getName()) {
         case 'topLeft':
           topRight.y(anchorY);
+          middleLeft.x(anchorX);
           bottomLeft.x(anchorX);
           break;
         case 'topRight':
+          middleRight.x(anchorX);
           topLeft.y(anchorY);
           bottomRight.x(anchorX);
           break;
         case 'bottomRight':
+          middleRight.x(anchorX);
           bottomLeft.y(anchorY);
           topRight.x(anchorX);
           break;
         case 'bottomLeft':
           bottomRight.y(anchorY);
+          middleLeft.x(anchorX);
           topLeft.x(anchorX);
+          break;
+        case 'middleRight':
+          topRight.x(anchorX);
+          bottomRight.x(anchorX);
+          break;
+        case 'middleLeft':
+          topLeft.x(anchorX);
+          bottomLeft.x(anchorX);
           break;
       }
 
@@ -309,13 +323,12 @@ export default class Ui {
       var width = topRight.x() - topLeft.x();
       var height = bottomLeft.y() - topLeft.y();
 
-      if (width && height) {
+      if (width < '700' && height < '500') {
         image.width(width);
         image.height(height);
       }
     }
     function addAnchor(group, x, y, name) {
-
       var anchor = new Konva.Circle({
         x: x,
         y: y,
@@ -340,12 +353,10 @@ export default class Ui {
       });
       // add hover styling
       anchor.on('mouseover', function () {
-        
         document.body.style.cursor = 'pointer';
         this.strokeWidth(4);
       });
       anchor.on('mouseout', function () {
-        
         document.body.style.cursor = 'default';
         this.strokeWidth(1);
       });
@@ -355,17 +366,16 @@ export default class Ui {
 
     var stage = new Konva.Stage({
       container: this.nodes.imageContainer,
-      width: 700,
-      height: 520,
+      Width: 700,
+      Height: 520,
     });
 
     var layer = new Konva.Layer();
     stage.add(layer);
 
-    
     var resizeImg = new Konva.Image({
-      width: 360,
-      height: 360,
+      Width: 600,
+      Height: 375,
     });
     resizeImg.image(imageEl);
 
@@ -376,10 +386,12 @@ export default class Ui {
     layer.add(resizeGroup);
     resizeGroup.add(resizeImg);
     addAnchor(resizeGroup, 0, 0, 'topLeft');
-    addAnchor(resizeGroup, 360, 0, 'topRight');
-    addAnchor(resizeGroup, 360, 360, 'bottomRight');
-    addAnchor(resizeGroup, 0, 360, 'bottomLeft');
-  };
+    addAnchor(resizeGroup, 600, 0, 'topRight');
+    addAnchor(resizeGroup, 600, 187, 'middleRight');
+    addAnchor(resizeGroup, 0, 187, 'middleLeft');
+    addAnchor(resizeGroup, 600, 375, 'bottomRight');
+    addAnchor(resizeGroup, 0, 375, 'bottomLeft');
+  }
 
   /**
    * Create align left set button
