@@ -272,126 +272,191 @@ export default class Ui {
    * @param {object} imageEl - image element
    */
   makeImageResizable(imageEl) {
-    function update(activeAnchor) {
-      var group = activeAnchor.getParent();
-
-      var topLeft = group.findOne('.topLeft');
-      var topRight = group.findOne('.topRight');
-      var middleRight = group.findOne('.middleRight');
-      var middleLeft = group.findOne('.middleLeft');
-      var bottomRight = group.findOne('.bottomRight');
-      var bottomLeft = group.findOne('.bottomLeft');
-      var image = group.findOne('Image');
-
-      var anchorX = activeAnchor.x();
-      var anchorY = activeAnchor.y();
-
-      // update anchor positions
-      switch (activeAnchor.getName()) {
-        case 'topLeft':
-          topRight.y(anchorY);
-          middleLeft.x(anchorX);
-          bottomLeft.x(anchorX);
-          break;
-        case 'topRight':
-          middleRight.x(anchorX);
-          topLeft.y(anchorY);
-          bottomRight.x(anchorX);
-          break;
-        case 'bottomRight':
-          middleRight.x(anchorX);
-          bottomLeft.y(anchorY);
-          topRight.x(anchorX);
-          break;
-        case 'bottomLeft':
-          bottomRight.y(anchorY);
-          middleLeft.x(anchorX);
-          topLeft.x(anchorX);
-          break;
-        case 'middleRight':
-          topRight.x(anchorX);
-          bottomRight.x(anchorX);
-          break;
-        case 'middleLeft':
-          topLeft.x(anchorX);
-          bottomLeft.x(anchorX);
-          break;
-      }
-
-      image.position(topLeft.position());
-
-      var width = topRight.x() - topLeft.x();
-      var height = bottomLeft.y() - topLeft.y();
-
-      if (width < '700' && height < '500') {
-        image.width(width);
-        image.height(height);
-      }
-    }
-    function addAnchor(group, x, y, name) {
-      var anchor = new Konva.Circle({
-        x: x,
-        y: y,
-        stroke: '#666',
-        fill: '#ddd',
-        strokeWidth: 1,
-        radius: 5,
-        name: name,
-        draggable: true,
-        dragOnTop: true,
-      });
-
-      anchor.on('dragmove', function () {
-        update(this);
-      });
-      anchor.on('mousedown touchstart', function () {
-        group.draggable(false);
-        this.moveToTop();
-      });
-      anchor.on('dragend', function () {
-        group.draggable(false);
-      });
-      // add hover styling
-      anchor.on('mouseover', function () {
-        document.body.style.cursor = 'pointer';
-        this.strokeWidth(4);
-      });
-      anchor.on('mouseout', function () {
-        document.body.style.cursor = 'default';
-        this.strokeWidth(1);
-      });
-
-      group.add(anchor);
-    }
-
     var stage = new Konva.Stage({
       container: this.nodes.imageContainer,
-      Width: 700,
-      Height: 520,
+      width: 700,
+      height: 410,
     });
 
     var layer = new Konva.Layer();
-    stage.add(layer);
+
+    var rect = new Konva.Rect({
+      width: 600,
+      height: 375,
+      name: 'rect',
+      draggable: true,
+    });
 
     var resizeImg = new Konva.Image({
       Width: 600,
       Height: 375,
     });
-    resizeImg.image(imageEl);
 
     var resizeGroup = new Konva.Group({
-      draggable: false,
+      draggable: true,
     });
 
+    var MAX_WIDTH = 700;
+    var MAX_HEIGHT = 410;
+
+    var tr = new Konva.Transformer({
+      boundBoxFunc: function (oldBoundBox, newBoundBox) {
+        if (
+          Math.abs(newBoundBox.width) > MAX_WIDTH ||
+          Math.abs(newBoundBox.height) > MAX_HEIGHT
+        ) {
+          return oldBoundBox;
+        }
+
+        return newBoundBox;
+      },
+    });
+
+    stage.add(layer);
+
+    resizeImg.image(imageEl);
+    layer.add(rect);
+
     layer.add(resizeGroup);
-    resizeGroup.add(resizeImg);
-    addAnchor(resizeGroup, 0, 0, 'topLeft');
-    addAnchor(resizeGroup, 600, 0, 'topRight');
-    addAnchor(resizeGroup, 600, 187, 'middleRight');
-    addAnchor(resizeGroup, 0, 187, 'middleLeft');
-    addAnchor(resizeGroup, 600, 375, 'bottomRight');
-    addAnchor(resizeGroup, 0, 375, 'bottomLeft');
+    layer.add(resizeImg);
+
+    layer.add(tr);
+    tr.nodes([resizeImg]);
   }
+
+  //   function update(activeAnchor) {
+  //     var group = activeAnchor.getParent();
+
+  //     var topLeft = group.findOne('.topLeft');
+  //     var topRight = group.findOne('.topRight');
+  //     var middleRight = group.findOne('.middleRight');
+  //     var middleLeft = group.findOne('.middleLeft');
+  //     var bottomRight = group.findOne('.bottomRight');
+  //     var bottomLeft = group.findOne('.bottomLeft');
+  //     var image = group.findOne('Image');
+
+  //     var anchorX = activeAnchor.x();
+  //     // var anchorY = activeAnchor.y();
+
+  //     // update anchor positions
+  //     switch (activeAnchor.getName()) {
+  //       // case 'topLeft':
+  //       //   middleLeft.y(anchorY);
+  //       //   middleRight.y(anchorY);
+  //       //   topRight.y(anchorY);
+  //       //   middleLeft.x(anchorX);
+  //       //   bottomLeft.x(anchorX);
+  //       //   break;
+  //       // case 'topRight':
+  //       //   middleLeft.y(anchorY);
+  //       //   middleRight.y(anchorY);
+  //       //   middleRight.x(anchorX);
+  //       //   topLeft.y(anchorY);
+  //       //   bottomRight.x(anchorX);
+  //       //   break;
+  //       // case 'bottomRight':
+  //       //   middleLeft.y(anchorY / 2);
+  //       //   middleRight.y(anchorY / 2);
+  //       //   middleRight.x(anchorX);
+  //       //   bottomLeft.y(anchorY);
+  //       //   topRight.x(anchorX);
+  //       //   break;
+  //       // case 'bottomLeft':
+  //       //   middleRight.y(anchorY / 2);
+  //       //   middleLeft.y(anchorY / 2);
+  //       //   bottomRight.y(anchorY);
+  //       //   middleLeft.x(anchorX);
+  //       //   topLeft.x(anchorX);
+  //       //   break;
+  //       case 'middleRight':
+  //         topRight.x(anchorX);
+  //         bottomRight.x(anchorX);
+  //         break;
+  //       case 'middleLeft':
+  //         topLeft.x(anchorX);
+  //         bottomLeft.x(anchorX);
+  //         break;
+  //     }
+
+  //     image.position(topLeft.position());
+
+  //     var width = middleRight.x() - middleLeft.x();
+  //     var height = width / 2;
+  //     // var middleY = height / 2;
+  //     console.log('width', width);
+  //     console.log('height', height);
+  //     if (width <= '700' && height <= '400') {
+  //       image.width(width);
+  //       image.height(height);
+  //     }
+  //   }
+  //   function addAnchor(group, x, y, name, radius, draggable) {
+  //     var anchor = new Konva.Rect({
+  //       x: x,
+  //       y: y,
+  //       stroke: '#666',
+  //       fill: '#ddd',
+  //       strokeWidth: 1,
+  //       width: 5,
+  //       height: 50,
+  //       cornerRadius: radius,
+  //       name: name,
+  //       draggable: draggable,
+  //       dragOnTop: true,
+  //     });
+
+  //     anchor.on('dragmove', function () {
+  //       update(this);
+  //       console.log('this', this);
+  //     });
+  //     anchor.on('mousedown touchstart', function () {
+  //       group.draggable(true);
+  //       this.moveToTop();
+  //     });
+  //     anchor.on('dragend', function () {
+  //       group.draggable(true);
+  //     });
+  //     // add hover styling
+  //     anchor.on('mouseover', function () {
+  //       document.body.style.cursor = 'pointer';
+  //       this.strokeWidth(4);
+  //     });
+  //     anchor.on('mouseout', function () {
+  //       document.body.style.cursor = 'default';
+  //       this.strokeWidth(1);
+  //     });
+
+  //     group.add(anchor);
+  //   }
+
+  //   var stage = new Konva.Stage({
+  //     container: this.nodes.imageContainer,
+  //     Width: 700,
+  //     Height: 410,
+  //   });
+
+  //   var layer = new Konva.Layer();
+  //   stage.add(layer);
+
+  //   var resizeImg = new Konva.Image({
+  //     Width: 600,
+  //     Height: 375,
+  //   });
+  //   resizeImg.image(imageEl);
+
+  //   var resizeGroup = new Konva.Group({
+  //     draggable: true,
+  //   });
+
+  //   layer.add(resizeGroup);
+  //   resizeGroup.add(resizeImg);
+  //   addAnchor(resizeGroup, 0, 0, 'topLeft', 0, true);
+  //   addAnchor(resizeGroup, 600, 0, 'topRight', 0, true);
+  //   addAnchor(resizeGroup, 610, 187, 'middleRight', 4, true);
+  //   addAnchor(resizeGroup, -10, 187, 'middleLeft', 4, true);
+  //   addAnchor(resizeGroup, 600, 375, 'bottomRight', 0, true);
+  //   addAnchor(resizeGroup, 0, 375, 'bottomLeft', 0, true);
+  // }
 
   /**
    * Create align left set button
