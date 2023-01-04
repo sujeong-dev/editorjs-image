@@ -89,7 +89,7 @@
   }
 
   &__alignButton {
-    border: none;
+    border: 1px solid transparent;
     background-color: transparent;
 
     &:hover {
@@ -112,6 +112,52 @@
     display: inline-block;
     width: 20%;
     padding: 10px 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(201, 201, 204, 0.48);
+    font-size: 14.9px;
+    background: #fff;
+    -webkit-box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    color: #707684;
+    text-align: center;
+    cursor: pointer;
+
+    &:disabled,
+    &[disabled] {
+      border: 1px solid #999999;
+      background-color: #cccccc;
+      color: #666666;
+      cursor: default;
+    }
+  }
+
+  &__undoResizeButton {
+    display: inline-block;
+    padding: 5px;
+    margin-left: 104px;
+    border-radius: 3px;
+    border: 1px solid rgba(201, 201, 204, 0.48);
+    font-size: 14.9px;
+    background: #fff;
+    -webkit-box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    color: #707684;
+    text-align: center;
+    cursor: pointer;
+
+    &:disabled,
+    &[disabled] {
+      border: 1px solid #999999;
+      background-color: #cccccc;
+      color: #666666;
+      cursor: default;
+    }
+  }
+
+  &__resizeModeButton {
+    display: inline-block;
+    padding: 5px;
+    margin-left: 10px;
     border-radius: 3px;
     border: 1px solid rgba(201, 201, 204, 0.48);
     font-size: 14.9px;
@@ -165,6 +211,13 @@
     }
   }
 
+  &--resizeMode-on {
+    ^&__resizeModeButton {
+      background: rgba(56, 138, 229, 0.1);
+      color: #388ae5;
+    }
+  }
+
   /**
    * Tunes
    * ----------------
@@ -196,7 +249,6 @@
     }
   }
 
-  /* TODO: align style 추가  */
   &--left {
     ^&__image-picture {
       margin: 0;

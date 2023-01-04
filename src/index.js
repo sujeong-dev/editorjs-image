@@ -166,6 +166,7 @@ export default class ImageTool {
       isSelectedLeft: config.isSelectedLeft || false,
       isSelectedCenter: config.isSelectedCenter || false,
       isSelectedRight: config.isSelectedRight || false,
+      isChangeResizeMode: config.isChangeResizeMode || false,
       imageWidth: config.imageWidth || 0,
       imageHeight: config.imageHeight || 0,
     };

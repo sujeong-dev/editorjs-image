@@ -3,6 +3,8 @@ import {
   IconAlignLeft,
   IconAlignRight,
   IconAlignCenter,
+  IconReplace,
+  IconUndo,
 } from '@codexteam/icons';
 import { make } from './utils/dom';
 
@@ -47,6 +49,8 @@ export default class Ui {
       centerAlign: this.createCenterAlignButton(),
       rightAlign: this.createRightAlignButton(),
       setSizeButton: this.createSetSizeButton(),
+      resizeModeButton: this.createResizeModeButton(),
+      undoResizeButton: this.createUndoResizeButton(),
       fileButton: this.createFileButton(),
       imageEl: undefined,
       imagePreloader: make('div', this.CSS.imagePreloader),
@@ -54,6 +58,7 @@ export default class Ui {
         contentEditable: !this.readOnly,
       }),
     };
+    this.konva = {};
 
     /**
      * Create base structure
@@ -88,6 +93,8 @@ export default class Ui {
     this.nodes.alignContainer.appendChild(this.nodes.imageWidth);
     this.nodes.alignContainer.appendChild(this.nodes.imageHeight);
     this.nodes.alignContainer.appendChild(this.nodes.setSizeButton);
+    this.nodes.alignContainer.appendChild(this.nodes.undoResizeButton);
+    this.nodes.alignContainer.appendChild(this.nodes.resizeModeButton);
     this.nodes.wrapper.appendChild(this.nodes.caption);
     this.nodes.wrapper.appendChild(this.nodes.fileButton);
   }
@@ -119,6 +126,8 @@ export default class Ui {
       rightAlign: 'image-tool__rightAlign',
       alignButton: 'image-tool__alignButton',
       setSizeBtn: 'image-tool__setSizeBtn',
+      resizeModeButton: 'image-tool__resizeModeButton',
+      undoResizeButton: 'image-tool__undoResizeButton',
     };
   }
 
@@ -267,6 +276,129 @@ export default class Ui {
   }
 
   /**
+   * Make the image resizable
+   *
+   * @param {object} imageEl - image element
+   */
+  makeImageResizable(imageEl) {
+    function update(activeAnchor) {
+      var group = activeAnchor.getParent();
+
+      var topLeft = group.findOne('.topLeft');
+      var topRight = group.findOne('.topRight');
+      var bottomRight = group.findOne('.bottomRight');
+      var bottomLeft = group.findOne('.bottomLeft');
+      var image = group.findOne('Image');
+
+      var anchorX = activeAnchor.x();
+      var anchorY = activeAnchor.y();
+
+      // update anchor positions
+      switch (activeAnchor.getName()) {
+        case 'topLeft':
+          topRight.y(anchorY);
+          bottomLeft.x(anchorX);
+          break;
+        case 'topRight':
+          topLeft.y(anchorY);
+          bottomRight.x(anchorX);
+          break;
+        case 'bottomRight':
+          bottomLeft.y(anchorY);
+          topRight.x(anchorX);
+          break;
+        case 'bottomLeft':
+          bottomRight.y(anchorY);
+          topLeft.x(anchorX);
+          break;
+      }
+
+      image.position(topLeft.position());
+
+      var width = topRight.x() - topLeft.x();
+      var height = bottomLeft.y() - topLeft.y();
+
+      if (width && height) {
+        const konvaStage = image.parent.parent.parent;
+        const stageWidth = konvaStage.attrs.width;
+        const stageHeight = konvaStage.attrs.height;
+
+        image.width(width);
+        image.height(width * (stageHeight / stageWidth));
+
+        // image.height(height);
+      }
+    }
+    function addAnchor(group, x, y, name) {
+      var anchor = new Konva.Circle({
+        x: x,
+        y: y,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 1,
+        radius: 5,
+        name: name,
+        draggable: true,
+        dragOnTop: true,
+      });
+
+      anchor.on('dragmove', function () {
+        update(this);
+      });
+      anchor.on('mousedown touchstart', function () {
+        group.draggable(true);
+        this.moveToTop();
+      });
+      anchor.on('dragend', function () {
+        group.draggable(true);
+      });
+      // add hover styling
+      anchor.on('mouseover', function () {
+        document.body.style.cursor = 'pointer';
+        this.strokeWidth(4);
+      });
+      anchor.on('mouseout', function () {
+        document.body.style.cursor = 'default';
+        this.strokeWidth(1);
+      });
+
+      group.add(anchor);
+    }
+
+    var stage = new Konva.Stage({
+      container: this.nodes.imageContainer,
+      width: 650,
+      height: 400,
+    });
+
+    var layer = new Konva.Layer();
+    stage.add(layer);
+
+    var resizeImg = new Konva.Image({
+      width: 360,
+      height: 360,
+    });
+    resizeImg.image(imageEl);
+
+    var resizeGroup = new Konva.Group({
+      draggable: true,
+    });
+
+    this.konva = {
+      stage: stage,
+      layer: layer,
+      group: resizeGroup,
+    };
+
+    layer.add(resizeGroup);
+    resizeGroup.add(resizeImg);
+    addAnchor(resizeGroup, 0, 0, 'topLeft');
+    addAnchor(resizeGroup, 360, 0, 'topRight');
+    addAnchor(resizeGroup, 360, 360, 'bottomRight');
+    addAnchor(resizeGroup, 0, 360, 'bottomLeft');
+  }
+
+  /**
    * Create align left set button
    *
    * @returns {Element}
@@ -318,7 +450,7 @@ export default class Ui {
    *
    * @returns {boolean}
    */
-  alignToggle(align) {
+  isToggle(align) {
     return !align;
   }
 
@@ -330,13 +462,11 @@ export default class Ui {
    */
   onSelectAlign(align) {
     this.config.isSelectedLeft =
-      align === 'left' ? this.alignToggle(this.config.isSelectedLeft) : false;
+      align === 'left' ? this.isToggle(this.config.isSelectedLeft) : false;
     this.config.isSelectedCenter =
-      align === 'center'
-        ? this.alignToggle(this.config.isSelectedCenter)
-        : false;
+      align === 'center' ? this.isToggle(this.config.isSelectedCenter) : false;
     this.config.isSelectedRight =
-      align === 'right' ? this.alignToggle(this.config.isSelectedRight) : false;
+      align === 'right' ? this.isToggle(this.config.isSelectedRight) : false;
     this.applyTune('left', this.config.isSelectedLeft);
     this.applyTune('center', this.config.isSelectedCenter);
     this.applyTune('right', this.config.isSelectedRight);
@@ -429,6 +559,64 @@ export default class Ui {
 
     button.addEventListener('click', () => {
       this.onSetImageSize();
+    });
+
+    return button;
+  }
+
+  createUndoResizeButton() {
+    const button = make('button', [this.CSS.undoResizeButton]);
+
+    button.innerHTML = `${IconUndo}`;
+    button.disabled = true;
+
+    button.addEventListener('click', () => {
+      if (this.config.isChangeResizeMode) {
+        this.config.isChangeResizeMode = !this.config.isChangeResizeMode;
+        this.applyTune('resizeMode-on', this.config.isChangeResizeMode);
+        this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
+        this.nodes.setSizeButton.disabled = this.config.isChangeResizeMode;
+        this.nodes.imageWidth.contentEditable = !this.config.isChangeResizeMode;
+        this.nodes.imageHeight.contentEditable =
+          !this.config.isChangeResizeMode;
+        this.konva.stage.content.remove();
+        this.nodes.imageContainer.appendChild(this.nodes.imageEl);
+      } else {
+        this.nodes.undoResizeButton.disabled = this.config.isChangeResizeMode;
+        this.applyTune('resizeMode-on', this.config.isChangeResizeMode);
+      }
+    });
+
+    return button;
+  }
+
+  /**
+   * Create size set button
+   *
+   * @returns {Element}
+   */
+  createResizeModeButton() {
+    const button = make('button', [this.CSS.resizeModeButton]);
+
+    button.innerHTML = `${IconReplace}`;
+
+    button.addEventListener('click', () => {
+      this.config.isChangeResizeMode = !this.config.isChangeResizeMode;
+      this.applyTune('resizeMode-on', this.config.isChangeResizeMode);
+      this.nodes.setSizeButton.disabled = this.config.isChangeResizeMode;
+      this.nodes.imageWidth.contentEditable = !this.config.isChangeResizeMode;
+      this.nodes.imageHeight.contentEditable = !this.config.isChangeResizeMode;
+      if (this.config.isChangeResizeMode) {
+        this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
+        this.makeImageResizable(this.nodes.imageEl);
+      } else {
+        this.nodes.undoResizeButton.disabled = this.config.isChangeResizeMode;
+        console.log(this.konva.group.children[0].attrs.width);
+        console.log(this.konva.group.children[0].attrs.height);
+
+        this.konva.stage.content.remove();
+        this.nodes.imageContainer.appendChild(this.nodes.imageEl);
+      }
     });
 
     return button;
