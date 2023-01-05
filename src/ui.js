@@ -271,11 +271,13 @@ export default class Ui {
    *
    * @param {object} imageEl - image element
    */
+
   makeImageResizable(imageEl) {
     var stage = new Konva.Stage({
       container: this.nodes.imageContainer,
       width: 700,
-      height: 410,
+      height: 400,
+      // draggable: true,
     });
 
     var layer = new Konva.Layer();
@@ -297,7 +299,7 @@ export default class Ui {
     });
 
     var MAX_WIDTH = 700;
-    var MAX_HEIGHT = 410;
+    var MAX_HEIGHT = 400;
 
     var tr = new Konva.Transformer({
       boundBoxFunc: function (oldBoundBox, newBoundBox) {
@@ -310,6 +312,8 @@ export default class Ui {
 
         return newBoundBox;
       },
+      rotateEnabled: false,
+      enabledAnchors: ['bottom-right'],
     });
 
     stage.add(layer);

@@ -4,11 +4,17 @@
   --border-color: #e8e8eb;
 
   &__image {
+    background-image: url('https://cdn.pixabay.com/photo/2015/09/16/16/59/hexagon-background-942982_960_720.png');
+    opacity: 0.5;
     border-radius: 3px;
     /* overflow: hidden; */
     margin-bottom: 5px;
     max-width: 700px;
     max-height: 410px;
+
+    &:hover {
+      opacity: 1;
+    }
 
     &-picture {
       max-width: 700px;
