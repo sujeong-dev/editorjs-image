@@ -281,121 +281,48 @@ export default class Ui {
    * @param {object} imageEl - image element
    */
   makeImageResizable(imageEl) {
-    function update(activeAnchor) {
-      var group = activeAnchor.getParent();
-
-      var topLeft = group.findOne('.topLeft');
-      var topRight = group.findOne('.topRight');
-      var bottomRight = group.findOne('.bottomRight');
-      var bottomLeft = group.findOne('.bottomLeft');
-      var image = group.findOne('Image');
-
-      var anchorX = activeAnchor.x();
-      var anchorY = activeAnchor.y();
-
-      // update anchor positions
-      switch (activeAnchor.getName()) {
-        case 'topLeft':
-          topRight.y(anchorY);
-          bottomLeft.x(anchorX);
-          break;
-        case 'topRight':
-          topLeft.y(anchorY);
-          bottomRight.x(anchorX);
-          break;
-        case 'bottomRight':
-          bottomLeft.y(anchorY);
-          topRight.x(anchorX);
-          break;
-        case 'bottomLeft':
-          bottomRight.y(anchorY);
-          topLeft.x(anchorX);
-          break;
-      }
-
-      image.position(topLeft.position());
-
-      var width = topRight.x() - topLeft.x();
-      var height = bottomLeft.y() - topLeft.y();
-
-      if (width && height) {
-        const konvaStage = image.parent.parent.parent;
-        const stageWidth = konvaStage.attrs.width;
-        const stageHeight = konvaStage.attrs.height;
-
-        image.width(width);
-        image.height(width * (stageHeight / stageWidth));
-
-        // image.height(height);
-      }
-    }
-    function addAnchor(group, x, y, name) {
-      var anchor = new Konva.Circle({
-        x: x,
-        y: y,
-        stroke: '#666',
-        fill: '#ddd',
-        strokeWidth: 1,
-        radius: 5,
-        name: name,
-        draggable: true,
-        dragOnTop: true,
-      });
-
-      anchor.on('dragmove', function () {
-        update(this);
-      });
-      anchor.on('mousedown touchstart', function () {
-        group.draggable(true);
-        this.moveToTop();
-      });
-      anchor.on('dragend', function () {
-        group.draggable(true);
-      });
-      // add hover styling
-      anchor.on('mouseover', function () {
-        document.body.style.cursor = 'pointer';
-        this.strokeWidth(4);
-      });
-      anchor.on('mouseout', function () {
-        document.body.style.cursor = 'default';
-        this.strokeWidth(1);
-      });
-
-      group.add(anchor);
-    }
-
     var stage = new Konva.Stage({
       container: this.nodes.imageContainer,
-      width: 650,
-      height: 400,
+      width: 700,
+      height: 410,
     });
 
     var layer = new Konva.Layer();
     stage.add(layer);
 
     var resizeImg = new Konva.Image({
-      width: 360,
-      height: 360,
+      Width: this.config.konvaWidth,
+      Height: this.config.konvaHeight,
     });
     resizeImg.image(imageEl);
+    layer.add(resizeImg);
 
-    var resizeGroup = new Konva.Group({
-      draggable: true,
+    var MAX_WIDTH = 700;
+    var MAX_HEIGHT = 410;
+
+    var tr = new Konva.Transformer({
+      rotateEnabled: false,
+      enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+      boundBoxFunc: function (oldBoundBox, newBoundBox) {
+        if (
+          Math.abs(newBoundBox.width) > MAX_WIDTH ||
+          Math.abs(newBoundBox.height) > MAX_HEIGHT
+        ) {
+          return oldBoundBox;
+        }
+
+        return newBoundBox;
+      },
     });
 
     this.konva = {
       stage: stage,
       layer: layer,
-      group: resizeGroup,
+      group: resizeImg,
     };
 
-    layer.add(resizeGroup);
-    resizeGroup.add(resizeImg);
-    addAnchor(resizeGroup, 0, 0, 'topLeft');
-    addAnchor(resizeGroup, 360, 0, 'topRight');
-    addAnchor(resizeGroup, 360, 360, 'bottomRight');
-    addAnchor(resizeGroup, 0, 360, 'bottomLeft');
+    layer.add(tr);
+    tr.nodes([resizeImg]);
   }
 
   /**
@@ -541,6 +468,13 @@ export default class Ui {
       this.getImageWidth === '' ? 0 : Number(this.getImageWidth);
     this.config.imageHeight =
       this.getImageHeight === '' ? 0 : Number(this.getImageHeight);
+    if (this.getImageWidth.length !== 0) {
+      this.config.konvaWidth = Number(this.getImageWidth);
+    }
+    if (this.getImageHeight.length !== 0) {
+      this.config.konvaHeight = Number(this.getImageHeight);
+    }
+
     this.nodes.imageEl.style.width =
       this.getImageWidth === '' ? '' : this.getImageWidth + 'px';
     this.nodes.imageEl.style.height =
@@ -580,6 +514,7 @@ export default class Ui {
         this.nodes.imageHeight.contentEditable =
           !this.config.isChangeResizeMode;
         this.konva.stage.content.remove();
+        this.nodes.imageEl.style.cssText = ``;
         this.nodes.imageContainer.appendChild(this.nodes.imageEl);
       } else {
         this.nodes.undoResizeButton.disabled = this.config.isChangeResizeMode;
@@ -610,12 +545,20 @@ export default class Ui {
         this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
         this.makeImageResizable(this.nodes.imageEl);
       } else {
-        this.nodes.undoResizeButton.disabled = this.config.isChangeResizeMode;
-        console.log(this.konva.group.children[0].attrs.width);
-        console.log(this.konva.group.children[0].attrs.height);
+        this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
 
         this.konva.stage.content.remove();
+        this.config.konvaWidth =
+          this.konva.group.parent.children[1].children[0].attrs.width;
+        this.config.konvaHeight =
+          this.konva.group.parent.children[1].children[0].attrs.height;
+        this.config.imageWidth = this.config.konvaWidth;
+        this.config.imageHeight = this.config.konvaHeight;
+        this.nodes.imageEl.style.cssText = `width:${this.config.konvaWidth}px;height:${this.config.konvaHeight}px;`;
         this.nodes.imageContainer.appendChild(this.nodes.imageEl);
+
+        this.nodes.imageWidth.innerText = parseInt(this.config.konvaWidth);
+        this.nodes.imageHeight.innerText = parseInt(this.config.konvaHeight);
       }
     });
 

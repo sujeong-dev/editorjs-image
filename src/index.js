@@ -169,6 +169,8 @@ export default class ImageTool {
       isChangeResizeMode: config.isChangeResizeMode || false,
       imageWidth: config.imageWidth || 0,
       imageHeight: config.imageHeight || 0,
+      konvaWidth: config.konvaWidth || 650,
+      konvaHeight: config.konvaHeight || 406,
     };
 
     /**
