@@ -552,13 +552,13 @@ export default class Ui {
           this.konva.group.parent.children[1].children[0].attrs.width;
         this.config.konvaHeight =
           this.konva.group.parent.children[1].children[0].attrs.height;
-        this.config.imageWidth = this.config.konvaWidth;
-        this.config.imageHeight = this.config.konvaHeight;
         this.nodes.imageEl.style.cssText = `width:${this.config.konvaWidth}px;height:${this.config.konvaHeight}px;`;
         this.nodes.imageContainer.appendChild(this.nodes.imageEl);
 
         this.nodes.imageWidth.innerText = parseInt(this.config.konvaWidth);
         this.nodes.imageHeight.innerText = parseInt(this.config.konvaHeight);
+        this.config.imageWidth = parseInt(this.config.konvaWidth);
+        this.config.imageHeight = parseInt(this.config.konvaHeight);
       }
     });
 
