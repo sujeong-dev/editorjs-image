@@ -4,21 +4,14 @@
   --border-color: #e8e8eb;
 
   &__image {
-    background-image: url('https://cdn.pixabay.com/photo/2015/09/16/16/59/hexagon-background-942982_960_720.png');
-    opacity: 0.5;
     border-radius: 3px;
-    /* overflow: hidden; */
+    overflow: hidden;
     margin-bottom: 5px;
-    max-width: 700px;
-    max-height: 410px;
-
-    &:hover {
-      opacity: 1;
-    }
+    background-image: url('https://cdn.pixabay.com/photo/2016/07/29/23/03/white-1556097_1280.png');
 
     &-picture {
-      max-width: 700px;
-      max-height: 520px;
+      max-width: 100%;
+      max-height: 500px;
       vertical-align: bottom;
       display: block;
     }
@@ -72,22 +65,6 @@
     }
   }
 
-  /* &__leftAlign {
-    display: inline-block;
-    width: 20%;
-    margin-right: 10px;
-  }
-  &__centerAlign {
-    display: inline-block;
-    width: 20%;
-    margin-right: 10px;
-  }
-  &__rightAlign {
-    display: inline-block;
-    width: 20%;
-    margin-right: 10px;
-  } */
-
   &__alignContainer {
     display: flex;
     flex-wrap: wrap;
@@ -96,7 +73,7 @@
   }
 
   &__alignButton {
-    border: none;
+    border: 1px solid transparent;
     background-color: transparent;
 
     &:hover {
@@ -119,6 +96,52 @@
     display: inline-block;
     width: 20%;
     padding: 10px 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(201, 201, 204, 0.48);
+    font-size: 14.9px;
+    background: #fff;
+    -webkit-box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    color: #707684;
+    text-align: center;
+    cursor: pointer;
+
+    &:disabled,
+    &[disabled] {
+      border: 1px solid #999999;
+      background-color: #cccccc;
+      color: #666666;
+      cursor: default;
+    }
+  }
+
+  &__undoResizeButton {
+    display: inline-block;
+    padding: 5px;
+    margin-left: 104px;
+    border-radius: 3px;
+    border: 1px solid rgba(201, 201, 204, 0.48);
+    font-size: 14.9px;
+    background: #fff;
+    -webkit-box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    box-shadow: 0 2px 2px 0 rgb(18 30 57 / 4%);
+    color: #707684;
+    text-align: center;
+    cursor: pointer;
+
+    &:disabled,
+    &[disabled] {
+      border: 1px solid #999999;
+      background-color: #cccccc;
+      color: #666666;
+      cursor: default;
+    }
+  }
+
+  &__resizeModeButton {
+    display: inline-block;
+    padding: 5px;
+    margin-left: 10px;
     border-radius: 3px;
     border: 1px solid rgba(201, 201, 204, 0.48);
     font-size: 14.9px;
@@ -172,6 +195,13 @@
     }
   }
 
+  &--resizeMode-on {
+    ^&__resizeModeButton {
+      background: rgba(56, 138, 229, 0.1);
+      color: #388ae5;
+    }
+  }
+
   /**
    * Tunes
    * ----------------
@@ -203,7 +233,6 @@
     }
   }
 
-  /* TODO: align style 추가  */
   &--left {
     ^&__image-picture {
       margin: 0;

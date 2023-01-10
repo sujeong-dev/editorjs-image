@@ -166,8 +166,11 @@ export default class ImageTool {
       isSelectedLeft: config.isSelectedLeft || false,
       isSelectedCenter: config.isSelectedCenter || false,
       isSelectedRight: config.isSelectedRight || false,
+      isChangeResizeMode: config.isChangeResizeMode || false,
       imageWidth: config.imageWidth || 0,
       imageHeight: config.imageHeight || 0,
+      konvaWidth: config.konvaWidth || 650,
+      konvaHeight: config.konvaHeight || 406,
     };
 
     /**
@@ -416,8 +419,6 @@ export default class ImageTool {
 
     if (file && file.url) {
       this.ui.fillImage(file.url);
-      console.log(this.ui.nodes.imageEl);
-      this.ui.makeImageResizable(this.ui.nodes.imageEl);
     }
   }
 
