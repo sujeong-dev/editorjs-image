@@ -30,15 +30,15 @@ export default class Ui {
     this.nodes = {
       wrapper: make('div', [this.CSS.baseClass, this.CSS.wrapper]),
       imageContainer: make('div', [this.CSS.imageContainer]),
-      imageWidth: make(
-        'div',
+      inputWidth: make(
+        'input',
         [this.CSS.input, this.CSS.caption, this.CSS.setImage],
         {
           contentEditable: !this.readOnly,
         }
       ),
-      imageHeight: make(
-        'div',
+      inputHeight: make(
+        'input',
         [this.CSS.input, this.CSS.caption, this.CSS.setImage],
         {
           contentEditable: !this.readOnly,
@@ -59,6 +59,8 @@ export default class Ui {
       }),
     };
     this.konva = {};
+    
+
 
     /**
      * Create base structure
@@ -70,17 +72,22 @@ export default class Ui {
      *    <select-file-button />
      *  </wrapper>
      */
+
+
     this.nodes.caption.dataset.placeholder = this.config.captionPlaceholder;
-    this.nodes.imageWidth.dataset.placeholder = this.config.widthPlaceholder;
-    this.nodes.imageWidth.addEventListener('keydown', (e) => {
+    this.nodes.inputWidth.placeholder = this.config.width || this.config.widthPlaceholder;
+    this.nodes.inputWidth.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
         this.onSetImageSize();
+       this.nodes.inputWidth.placeholder = this.nodes.imageEl.style.width;
       }
     });
-    this.nodes.imageHeight.dataset.placeholder = this.config.heightPlaceholder;
-    this.nodes.imageHeight.addEventListener('keydown', (e) => {
+    this.nodes.inputHeight.placeholder = this.config.heightPlaceholder;
+    this.nodes.inputHeight.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
         this.onSetImageSize();
+        this.nodes.inputHeight.placeholder = this.nodes.imageEl.style.height;
+
       }
     });
 
@@ -90,8 +97,8 @@ export default class Ui {
     this.nodes.alignContainer.appendChild(this.nodes.leftAlign);
     this.nodes.alignContainer.appendChild(this.nodes.centerAlign);
     this.nodes.alignContainer.appendChild(this.nodes.rightAlign);
-    this.nodes.alignContainer.appendChild(this.nodes.imageWidth);
-    this.nodes.alignContainer.appendChild(this.nodes.imageHeight);
+    this.nodes.alignContainer.appendChild(this.nodes.inputWidth);
+    this.nodes.alignContainer.appendChild(this.nodes.inputHeight);
     this.nodes.alignContainer.appendChild(this.nodes.setSizeButton);
     this.nodes.alignContainer.appendChild(this.nodes.undoResizeButton);
     this.nodes.alignContainer.appendChild(this.nodes.resizeModeButton);
@@ -176,13 +183,15 @@ export default class Ui {
       `${IconPicture} ${this.api.i18n.t('Select an Image')}`;
 
     button.addEventListener('click', () => {
+
       this.onSelectFile();
+
     });
 
     return button;
   }
 
-  /**
+  /**    
    * Shows uploading preloader
    *
    * @param {string} src - preview source
@@ -257,6 +266,7 @@ export default class Ui {
      * @type {Element}
      */
     this.nodes.imageEl = make(tag, this.CSS.imageEl, attributes);
+      this.nodes.imageEl.style.width = this.config.width;
 
     /**
      * Add load event listener
@@ -281,28 +291,43 @@ export default class Ui {
    * @param {object} imageEl - image element
    */
   makeImageResizable(imageEl) {
+    var MAX_WIDTH = window.innerWidth;
+    var MAX_HEIGHT = window.innerHeight;
+
+    console.log('[MAX_WIDTH] ==>', MAX_WIDTH);
+    console.log('[MAX_HEIGHT] ==>', MAX_HEIGHT)
+    console.log('[konvaWidth] ==>', this.config.konvaWidth)
+
+
     var stage = new Konva.Stage({
       container: this.nodes.imageContainer,
-      width: 700,
-      height: 410,
+      width: MAX_WIDTH,
+      height: MAX_HEIGHT,
+      
     });
-
+  
     var layer = new Konva.Layer();
-    stage.add(layer);
+    stage.add(layer); 
 
     var resizeImg = new Konva.Image({
       Width: this.config.konvaWidth,
       Height: this.config.konvaHeight,
+      draggable: true
     });
     resizeImg.image(imageEl);
     layer.add(resizeImg);
 
-    var MAX_WIDTH = 700;
-    var MAX_HEIGHT = 410;
+    const test = (width, height) => {
+      console.log('[value] ==<', width, height);
+      console.log('[this] ==>', this)
+      this.config.konvaWidth = width;
+      this.config.konvaHeight = height;
+      console.log('[konva] ==>',  this.config.konvaWidth,  this.config.konvaHeight)
+    }
 
     var tr = new Konva.Transformer({
       rotateEnabled: false,
-      enabledAnchors: ['bottom-right'],
+      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
       boundBoxFunc: function (oldBoundBox, newBoundBox) {
         if (
           Math.abs(newBoundBox.width) > MAX_WIDTH ||
@@ -310,8 +335,11 @@ export default class Ui {
         ) {
           return oldBoundBox;
         }
-
-        return newBoundBox;
+        console.log('[newBoundBox] ==>' ,newBoundBox);
+        
+        const {width, height} = newBoundBox;
+        test(width, height);
+        return newBoundBox;  
       },
     });
 
@@ -323,6 +351,9 @@ export default class Ui {
 
     layer.add(tr);
     tr.nodes([resizeImg]);
+    console.log('[tr] ==>', tr)
+    console.log('[stage] ==>', stage)
+
   }
 
   /**
@@ -401,43 +432,44 @@ export default class Ui {
   }
 
   createInputWidth() {
-    const div = make(
-      'div',
+    const input = make(
+      'input',
       [this.CSS.input, this.CSS.caption, this.CSS.setImage],
       {
         contentEditable: !this.readOnly,
       }
     );
 
-    this.nodes.imageWidth.dataset.placeholder = this.config.widthPlaceholder;
+    this.nodes.inputWidth.placeholder = this.config.widthPlaceholder;
 
-    div.addEventListener('keydown', (e) => {
+
+    input.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
         this.onSetImageSize();
       }
     });
 
-    return div;
+    return input;
   }
 
   createInputHeight() {
-    const div = make(
-      'div',
+    const input = make(
+      'input',
       [this.CSS.input, this.CSS.caption, this.CSS.setImage],
       {
         contentEditable: !this.readOnly,
       }
     );
 
-    this.nodes.imageHeight.dataset.placeholder = this.config.heightPlaceholder;
+    this.nodes.inputHeight.placeholder = this.config.heightPlaceholder;
 
-    div.addEventListener('keydown', (e) => {
+    input.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
         this.onSetImageSize();
       }
     });
 
-    return div;
+    return input;
   }
 
   /**
@@ -445,8 +477,8 @@ export default class Ui {
    *
    * @returns {String}
    */
-  get getImageWidth() {
-    return this.nodes.imageWidth.textContent;
+  get getInputWidth() {
+    return this.nodes.inputWidth.value;
   }
 
   /**
@@ -454,8 +486,8 @@ export default class Ui {
    *
    * @returns {String}
    */
-  get getImageHeight() {
-    return this.nodes.imageHeight.textContent;
+  get getInputHeight() {
+    return this.nodes.inputHeight.value;
   }
 
   /**
@@ -464,21 +496,49 @@ export default class Ui {
    * @returns {Void}
    */
   onSetImageSize() {
-    this.config.imageWidth =
-      this.getImageWidth === '' ? 0 : Number(this.getImageWidth);
-    this.config.imageHeight =
-      this.getImageHeight === '' ? 0 : Number(this.getImageHeight);
-    if (this.getImageWidth.length !== 0) {
-      this.config.konvaWidth = Number(this.getImageWidth);
-    }
-    if (this.getImageHeight.length !== 0) {
-      this.config.konvaHeight = Number(this.getImageHeight);
-    }
 
-    this.nodes.imageEl.style.width =
-      this.getImageWidth === '' ? '' : this.getImageWidth + 'px';
-    this.nodes.imageEl.style.height =
-      this.getImageHeight === '' ? '' : this.getImageHeight + 'px';
+    let currentInputWidth = Number(this.nodes.inputWidth.value);
+    let currentInputHeight = Number(this.nodes.inputHeight.value);
+
+    // input width => this.nodes.inputWidth.value
+    // input height => this.nodes.inputHeight.value
+
+    // this.nodes.inputWidth 이 존재할 때
+    if (this.nodes.inputWidth.value) {
+      if (this.nodes.inputHeight.value) {
+        // width O height O
+        this.nodes.imageEl.style.width = currentInputWidth;
+        this.nodes.imageEl.style.height = currentInputHeight;
+      } else {
+        const prevHeight = this.nodes.imageEl.style.height;
+        // width O height X
+        this.nodes.imageEl.style.width = currentInputWidth;
+        this.nodes.imageEl.style.height = prevHeight;
+      }
+    } else {
+      if (this.nodes.inputHeight.value) {
+        // width X height O
+        const prevWidth = this.nodes.imageEl.style.width;
+        // width O height X
+        this.nodes.imageEl.style.width = prevWidth;
+        this.nodes.imageEl.style.height = currentInputHeight;
+      } 
+    }
+    // this.config.inputWidth =
+    //   this.getInputWidth === '' ? 0 : Number(this.getInputWidth);
+    // this.config.inputHeight =
+    //   this.getInputHeight === '' ? 0 : Number(this.getInputHeight);
+    // if (this.getInputWidth.length !== 0) {
+    //   this.config.konvaWidth = Number(this.getInputWidth);
+    // }
+    // if (this.getInputHeight.length !== 0) {
+    //   this.config.konvaHeight = Number(this.getInputHeight);
+    // }
+
+    // this.nodes.imageEl.style.width =
+    //   this.getInputWidth === '' ? '' : this.getInputWidth + 'px';
+    // this.nodes.imageEl.style.height =
+    //   this.getInputHeight === '' ? '' : this.getInputHeight + 'px';
   }
 
   /**
@@ -493,6 +553,8 @@ export default class Ui {
 
     button.addEventListener('click', () => {
       this.onSetImageSize();
+      this.nodes.inputWidth.placeholder = this.nodes.imageEl.style.width;
+      this.nodes.inputHeight.placeholder = this.nodes.imageEl.style.height;
     });
 
     return button;
@@ -510,8 +572,8 @@ export default class Ui {
         this.applyTune('resizeMode-on', this.config.isChangeResizeMode);
         this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
         this.nodes.setSizeButton.disabled = this.config.isChangeResizeMode;
-        this.nodes.imageWidth.contentEditable = !this.config.isChangeResizeMode;
-        this.nodes.imageHeight.contentEditable =
+        this.nodes.inputWidth.contentEditable = !this.config.isChangeResizeMode;
+        this.nodes.inputHeight.contentEditable =
           !this.config.isChangeResizeMode;
         this.konva.stage.content.remove();
         this.nodes.imageEl.style.cssText = ``;
@@ -537,10 +599,10 @@ export default class Ui {
 
     button.addEventListener('click', () => {
       this.config.isChangeResizeMode = !this.config.isChangeResizeMode;
-      this.applyTune('resizeMode-on', this.config.isChangeResizeMode);
+      this.applyTune('resizeMode-on', this.config.isChangeResizeMode); // this.applyTune('tuneName',status)
       this.nodes.setSizeButton.disabled = this.config.isChangeResizeMode;
-      this.nodes.imageWidth.contentEditable = !this.config.isChangeResizeMode;
-      this.nodes.imageHeight.contentEditable = !this.config.isChangeResizeMode;
+      this.nodes.inputWidth.contentEditable = !this.config.isChangeResizeMode;
+      this.nodes.inputHeight.contentEditable = !this.config.isChangeResizeMode;
       if (this.config.isChangeResizeMode) {
         this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
         this.makeImageResizable(this.nodes.imageEl);
@@ -554,11 +616,10 @@ export default class Ui {
           this.konva.group.parent.children[1].children[0].attrs.height;
         this.nodes.imageEl.style.cssText = `width:${this.config.konvaWidth}px;height:${this.config.konvaHeight}px;`;
         this.nodes.imageContainer.appendChild(this.nodes.imageEl);
-
-        this.nodes.imageWidth.innerText = parseInt(this.config.konvaWidth);
-        this.nodes.imageHeight.innerText = parseInt(this.config.konvaHeight);
-        this.config.imageWidth = parseInt(this.config.konvaWidth);
-        this.config.imageHeight = parseInt(this.config.konvaHeight);
+        this.nodes.inputWidth.innerText = parseInt(this.config.konvaWidth);
+        this.nodes.inputHeight.innerText = parseInt(this.config.konvaHeight);
+        this.config.inputWidth = parseInt(this.config.konvaWidth);
+        this.config.inputHeight = parseInt(this.config.konvaHeight);
       }
     });
 

@@ -167,10 +167,10 @@ export default class ImageTool {
       isSelectedCenter: config.isSelectedCenter || false,
       isSelectedRight: config.isSelectedRight || false,
       isChangeResizeMode: config.isChangeResizeMode || false,
-      imageWidth: config.imageWidth || 0,
-      imageHeight: config.imageHeight || 0,
+      width: data.width || 0,
+      height: data.height || 0,
       konvaWidth: config.konvaWidth || 650,
-      konvaHeight: config.konvaHeight || 406,
+      konvaHeight: config.konvaHeight || 650,
     };
 
     /**
@@ -249,8 +249,11 @@ export default class ImageTool {
       this._data.alignment = '';
     }
 
-    this._data.width = this.config.imageWidth;
-    this._data.height = this.config.imageHeight;
+    
+    this._data.width = this.ui.nodes.imageEl.style.width;
+
+    // this._data.width = this.ui.nodes.imageWidth;
+    // this._data.height = this.ui.nodes.imageHeight;
 
     return this.data;
   }
@@ -416,8 +419,8 @@ export default class ImageTool {
    */
   set image(file) {
     this._data.file = file || {};
-
-    if (file && file.url) {
+   
+if (file && file.url) {
       this.ui.fillImage(file.url);
     }
   }

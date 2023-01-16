@@ -7,11 +7,11 @@
     border-radius: 3px;
     overflow: hidden;
     margin-bottom: 5px;
-    background-image: url('https://cdn.pixabay.com/photo/2016/07/29/23/03/white-1556097_1280.png');
+    background-image: url('https://cdn.pixabay.com/photo/2016/07/29/23/03/white-1556097_1280.png'); 
 
     &-picture {
       max-width: 100%;
-      max-height: 500px;
+      /* max-height: 500px; */
       vertical-align: bottom;
       display: block;
     }
@@ -261,7 +261,14 @@
       margin: 0 6px 0 0;
     }
   }
+
 }
+/* 
+  .ce-block__content {
+    position: relative;
+    max-width: 1280px;
+    margin: 0 auto;
+  } */
 
 @keyframes image-preloader-spin {
   0% {
