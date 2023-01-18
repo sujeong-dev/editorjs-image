@@ -62,6 +62,9 @@ export default class Ui {
     
 
 
+    
+
+
     /**
      * Create base structure
      *  <wrapper>
@@ -82,7 +85,7 @@ export default class Ui {
        this.nodes.inputWidth.placeholder = this.nodes.imageEl.style.width;
       }
     });
-    this.nodes.inputHeight.placeholder = this.config.heightPlaceholder;
+    this.nodes.inputHeight.placeholder =this.config.height || this.config.heightPlaceholder;
     this.nodes.inputHeight.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
         this.onSetImageSize();
@@ -267,6 +270,8 @@ export default class Ui {
      */
     this.nodes.imageEl = make(tag, this.CSS.imageEl, attributes);
       this.nodes.imageEl.style.width = this.config.width;
+      this.nodes.imageEl.style.height = this.config.height;
+      
 
     /**
      * Add load event listener
@@ -290,72 +295,8 @@ export default class Ui {
    *
    * @param {object} imageEl - image element
    */
-  makeImageResizable(imageEl) {
-    var MAX_WIDTH = window.innerWidth;
-    var MAX_HEIGHT = window.innerHeight;
-
-    console.log('[MAX_WIDTH] ==>', MAX_WIDTH);
-    console.log('[MAX_HEIGHT] ==>', MAX_HEIGHT)
-    console.log('[konvaWidth] ==>', this.config.konvaWidth)
-
-
-    var stage = new Konva.Stage({
-      container: this.nodes.imageContainer,
-      width: MAX_WIDTH,
-      height: MAX_HEIGHT,
-      
-    });
   
-    var layer = new Konva.Layer();
-    stage.add(layer); 
-
-    var resizeImg = new Konva.Image({
-      Width: this.config.konvaWidth,
-      Height: this.config.konvaHeight,
-      draggable: true
-    });
-    resizeImg.image(imageEl);
-    layer.add(resizeImg);
-
-    const test = (width, height) => {
-      console.log('[value] ==<', width, height);
-      console.log('[this] ==>', this)
-      this.config.konvaWidth = width;
-      this.config.konvaHeight = height;
-      console.log('[konva] ==>',  this.config.konvaWidth,  this.config.konvaHeight)
-    }
-
-    var tr = new Konva.Transformer({
-      rotateEnabled: false,
-      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
-      boundBoxFunc: function (oldBoundBox, newBoundBox) {
-        if (
-          Math.abs(newBoundBox.width) > MAX_WIDTH ||
-          Math.abs(newBoundBox.height) > MAX_HEIGHT
-        ) {
-          return oldBoundBox;
-        }
-        console.log('[newBoundBox] ==>' ,newBoundBox);
-        
-        const {width, height} = newBoundBox;
-        test(width, height);
-        return newBoundBox;  
-      },
-    });
-
-    this.konva = {
-      stage: stage,
-      layer: layer,
-      group: resizeImg,
-    };
-
-    layer.add(tr);
-    tr.nodes([resizeImg]);
-    console.log('[tr] ==>', tr)
-    console.log('[stage] ==>', stage)
-
-  }
-
+  
   /**
    * Create align left set button
    *
@@ -490,6 +431,62 @@ export default class Ui {
     return this.nodes.inputHeight.value;
   }
 
+
+    
+  makeImageResizable(imageEl) {
+    var imgWidth = this.nodes.imageEl.width;
+    var imgHeight = this.nodes.imageEl.height;
+   
+    var canvasWidth = this.config.konvaWidth;
+    var canvasHeight = imgHeight / imgWidth * canvasWidth;
+
+    var stage = new Konva.Stage({
+      container: this.nodes.imageContainer,
+      width: canvasWidth,
+      height: canvasHeight,
+     
+    });
+  
+    var layer = new Konva.Layer();
+    stage.add(layer); 
+    
+
+    var resizeImg = new Konva.Image({
+      width : this.config.width,
+      height : this.config.height,
+      draggable: true
+    });
+    resizeImg.image(imageEl);
+    layer.add(resizeImg);
+
+
+    var tr = new Konva.Transformer({
+      rotateEnabled: true,
+      enabledAnchors: ["top-left", "top-right", "bottom-left", "bottom-right"],
+      boundBoxFunc: function (oldBoundBox, newBoundBox) {
+
+        if (
+          Math.abs(newBoundBox.width) > canvasWidth ||
+          Math.abs(newBoundBox.height) > canvasHeight
+        ) {
+          return oldBoundBox;
+        }
+        return newBoundBox;  
+      },
+    });
+
+
+    this.konva = {
+      stage: stage,
+      layer: layer,
+      group: resizeImg,
+    };
+
+    layer.add(tr);
+    tr.nodes([resizeImg]); 
+
+  }
+
   /**
    * Set image width and height value
    *
@@ -500,10 +497,8 @@ export default class Ui {
     let currentInputWidth = Number(this.nodes.inputWidth.value);
     let currentInputHeight = Number(this.nodes.inputHeight.value);
 
-    // input width => this.nodes.inputWidth.value
-    // input height => this.nodes.inputHeight.value
 
-    // this.nodes.inputWidth 이 존재할 때
+
     if (this.nodes.inputWidth.value) {
       if (this.nodes.inputHeight.value) {
         // width O height O
@@ -562,12 +557,13 @@ export default class Ui {
 
   createUndoResizeButton() {
     const button = make('button', [this.CSS.undoResizeButton]);
-
     button.innerHTML = `${IconUndo}`;
     button.disabled = true;
 
     button.addEventListener('click', () => {
+    
       if (this.config.isChangeResizeMode) {
+    
         this.config.isChangeResizeMode = !this.config.isChangeResizeMode;
         this.applyTune('resizeMode-on', this.config.isChangeResizeMode);
         this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
@@ -594,34 +590,36 @@ export default class Ui {
    */
   createResizeModeButton() {
     const button = make('button', [this.CSS.resizeModeButton]);
-
     button.innerHTML = `${IconReplace}`;
 
     button.addEventListener('click', () => {
-      this.config.isChangeResizeMode = !this.config.isChangeResizeMode;
-      this.applyTune('resizeMode-on', this.config.isChangeResizeMode); // this.applyTune('tuneName',status)
+      this.config.isChangeResizeMode = !this.config.isChangeResizeMode; 
+      this.applyTune('resizeMode-on', this.config.isChangeResizeMode); 
       this.nodes.setSizeButton.disabled = this.config.isChangeResizeMode;
       this.nodes.inputWidth.contentEditable = !this.config.isChangeResizeMode;
       this.nodes.inputHeight.contentEditable = !this.config.isChangeResizeMode;
-      if (this.config.isChangeResizeMode) {
-        this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
-        this.makeImageResizable(this.nodes.imageEl);
-      } else {
-        this.nodes.undoResizeButton.disabled = !this.config.isChangeResizeMode;
 
+      if (this.config.isChangeResizeMode) {
+           this.nodes.imageContainer.style.backgroundImage = `url('https://cdn.pixabay.com/photo/2016/07/29/23/03/white-1556097_1280.png')`;
+          this.makeImageResizable(this.nodes.imageEl);
+          this.nodes.undoResizeButton.style.visibility = 'hidden'
+      } else {
         this.konva.stage.content.remove();
-        this.config.konvaWidth =
+        this.nodes.imageContainer.style.backgroundImage = ''
+        this.nodes.undoResizeButton.style.visibility = 'visible'
+        this.nodes.undoResizeButton.disabled = false;
+  
+      
+        this.config.width =
           this.konva.group.parent.children[1].children[0].attrs.width;
-        this.config.konvaHeight =
+          this.config.height =
           this.konva.group.parent.children[1].children[0].attrs.height;
-        this.nodes.imageEl.style.cssText = `width:${this.config.konvaWidth}px;height:${this.config.konvaHeight}px;`;
+          this.nodes.imageEl.style.cssText = `width:${this.config.width}px;height:${this.config.height}px;`;
         this.nodes.imageContainer.appendChild(this.nodes.imageEl);
-        this.nodes.inputWidth.innerText = parseInt(this.config.konvaWidth);
-        this.nodes.inputHeight.innerText = parseInt(this.config.konvaHeight);
-        this.config.inputWidth = parseInt(this.config.konvaWidth);
-        this.config.inputHeight = parseInt(this.config.konvaHeight);
+        this.nodes.inputHeight.placeholder = `${parseInt(this.config.height)} px`;
       }
     });
+
 
     return button;
   }

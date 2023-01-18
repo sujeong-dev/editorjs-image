@@ -167,10 +167,11 @@ export default class ImageTool {
       isSelectedCenter: config.isSelectedCenter || false,
       isSelectedRight: config.isSelectedRight || false,
       isChangeResizeMode: config.isChangeResizeMode || false,
-      width: data.width || 0,
-      height: data.height || 0,
+      width: data.width || 300,
+      height: data.height || 300,
       konvaWidth: config.konvaWidth || 650,
       konvaHeight: config.konvaHeight || 650,
+
     };
 
     /**
@@ -248,13 +249,13 @@ export default class ImageTool {
     } else {
       this._data.alignment = '';
     }
-
-    
-    this._data.width = this.ui.nodes.imageEl.style.width;
-
-    // this._data.width = this.ui.nodes.imageWidth;
-    // this._data.height = this.ui.nodes.imageHeight;
-
+      
+      this._data.width = parseInt(this.ui.nodes.imageEl.style.width);
+      this._data.height = parseInt(this.ui.nodes.imageEl.style.height);
+        
+      // this._data.width = this.ui.nodes.imageWidth;
+      // this._data.height = this.ui.nodes.imageHeight;
+ 
     return this.data;
   }
 
@@ -385,7 +386,6 @@ export default class ImageTool {
    */
   set data(data) {
     this.image = data.file;
-
     this._data.caption = data.caption || '';
     this.ui.fillCaption(this._data.caption);
 
